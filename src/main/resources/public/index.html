@@ -1072,6 +1072,8 @@
                 if (response.ok) {
                     result.innerHTML = `<div class="card markdown-content">${formatMarkdown(data.resumo)}</div>`;
                     result.classList.remove('hidden');
+                } else if (response.status === 429) {
+                    alert('Você atingiu o limite diário de requisições da API. Por favor, tente novamente mais tarde ou amanhã.');
                 } else {
                     alert(data.erro || 'Erro ao gerar resumo');
                 }
@@ -1123,6 +1125,8 @@
                 if (response.ok) {
                     displayQuiz(data);
                     result.classList.remove('hidden');
+                } else if (response.status === 429) {
+                    alert('Você atingiu o limite diário de requisições da API. Por favor, tente novamente mais tarde ou amanhã.');
                 } else {
                     alert(data.erro || 'Erro ao criar quiz');
                 }
@@ -1176,6 +1180,8 @@
                     isFlipped = false;
                     displayFlashcard();
                     result.classList.remove('hidden');
+                } else if (response.status === 429) {
+                    alert('Você atingiu o limite diário de requisições da API. Por favor, tente novamente mais tarde ou amanhã.');
                 } else {
                     alert(data.erro || 'Erro ao criar flashcards');
                 }
@@ -1235,6 +1241,8 @@
                 if (response.ok) {
                     result.innerHTML = `<div class="card markdown-content">${formatMarkdown(data.resposta)}</div>`;
                     result.classList.remove('hidden');
+                } else if (response.status === 429) {
+                    alert('Você atingiu o limite diário de requisições da API. Por favor, tente novamente mais tarde ou amanhã.');
                 } else {
                     alert(data.erro || 'Erro ao responder');
                 }
