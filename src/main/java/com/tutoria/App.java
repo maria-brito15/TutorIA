@@ -22,7 +22,6 @@ public class App {
 
     public static void main(String[] args) throws SQLException {
 
-        // Conexão com banco
         Connection conn = DriverManager.getConnection(
                 ConfigLoader.getDatabaseUrl(),
                 ConfigLoader.getDatabaseUser(),
@@ -37,31 +36,25 @@ public class App {
 
         port(PORT);
 
-        // Frontend
         staticFiles.location("/public");
 
         configurarCORS(authService);
 
-        // 🔒 Filtro global de autenticação
         before((req, res) -> {
             String path = req.pathInfo();
 
-            // Libera preflight de CORS
             if (req.requestMethod().equals("OPTIONS")) {
                 return;
             }
 
-            // Libera rotas públicas da API
             if (ROTAS_PUBLICAS.contains(path)) {
                 return;
             }
 
-            // Libera arquivos estáticos (html, js, css, imagens, etc.)
             if (path.matches(".*\\.[a-zA-Z0-9]+$")) {
                 return;
             }
 
-            // 🔒 Verificação do token
             String authHeader = req.headers("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 halt(401, "{\"error\":\"Token não fornecido\"}");
@@ -76,12 +69,10 @@ public class App {
             }
         });
 
-        // Configuração das rotas
         new AIController(aiService).configurarRotas();
         new UserController(userService).configurarRotas();
         new AuthController(userService, authService).configurarRotas();
 
-        // Rotas extras
         get("/teste", (req, res) -> {
             res.type("application/json");
             return "{\"mensagem\": \"TutorIA API está rodando!\", \"versao\": \"1.0.0\"}";
@@ -92,7 +83,6 @@ public class App {
             return "{\"status\": \"ok\"}";
         });
 
-        // Exemplo de rotas protegidas específicas
         protegerRotas(authService, "/ai/*", "/me/nome", "/me/senha", "/me");
     }
 
