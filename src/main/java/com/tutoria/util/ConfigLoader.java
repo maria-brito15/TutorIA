@@ -13,13 +13,13 @@ public class ConfigLoader {
             properties = new Properties();
             try (InputStream input = ConfigLoader.class.getClassLoader()
                     .getResourceAsStream("application.properties")) {
-                
-                if (input == null) {
-                    throw new RuntimeException("Arquivo application.properties não encontrado");
+
+                if (input != null) {
+                    properties.load(input);
+                } else {
+                    System.out.println("⚠️ Arquivo application.properties não encontrado. Usando apenas variáveis de ambiente.");
                 }
-                
-                properties.load(input);
-                
+
             } catch (IOException e) {
                 throw new RuntimeException("Erro ao carregar application.properties", e);
             }
@@ -28,17 +28,18 @@ public class ConfigLoader {
 
     public static String getProperty(String chave) {
         carregarProperties();
-        String valor = properties.getProperty(chave);
-        
-        if (valor != null && valor.startsWith("${") && valor.endsWith("}")) {
-            String nomeVar = valor.substring(2, valor.length() - 1);
-            valor = System.getenv(nomeVar);
-            
-            if (valor == null) {
-                throw new RuntimeException("Variável de ambiente não encontrada: " + nomeVar);
-            }
+
+        String envKey = chave.toUpperCase().replace('.', '_');
+        String valor = System.getenv(envKey);
+
+        if (valor == null) {
+            valor = properties.getProperty(chave);
         }
-        
+
+        if (valor == null) {
+            throw new RuntimeException("⚠️ Valor não encontrado para a chave: " + chave);
+        }
+
         return valor;
     }
 

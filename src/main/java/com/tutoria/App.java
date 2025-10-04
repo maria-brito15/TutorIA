@@ -1,5 +1,10 @@
 package com.tutoria;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Set;
+
 import com.tutoria.controller.AIController;
 import com.tutoria.controller.AuthController;
 import com.tutoria.controller.UserController;
@@ -8,19 +13,21 @@ import com.tutoria.service.AuthService;
 import com.tutoria.service.UserService;
 import com.tutoria.util.ConfigLoader;
 
-import static spark.Spark.*;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Set;
+import static spark.Spark.before;
+import static spark.Spark.get;
+import static spark.Spark.halt;
+import static spark.Spark.options;
+import static spark.Spark.port;
+import static spark.Spark.staticFiles;
 
 public class App {
 
-    private static final int PORT = 4567;
     private static final Set<String> ROTAS_PUBLICAS = Set.of("/health", "/login", "/register", "/");
 
     public static void main(String[] args) throws SQLException {
+
+        int assignedPort = getAssignedPort();
+        port(assignedPort);
 
         Connection conn = DriverManager.getConnection(
                 ConfigLoader.getDatabaseUrl(),
@@ -33,8 +40,6 @@ public class App {
 
         AuthService authService = new AuthService();
         AIService aiService = new AIService(ConfigLoader.getAIApiKey());
-
-        port(PORT);
 
         staticFiles.location("/public");
 
@@ -122,5 +127,15 @@ public class App {
                 }
             });
         }
+    }
+
+    private static int getAssignedPort() {
+        String port = System.getenv("PORT");
+
+        if (port != null) {
+            return Integer.parseInt(port);
+        }
+
+        return 4567;
     }
 }
