@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TutorIA - Assistente de Estudos com IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f7f5f2;
+            --bg-secondary: #ffffff;
+            --text-primary: #2d2d2d;
+            --text-secondary: #6e6e6e;
+            --accent: #c17a4d;
+            --accent-hover: #a66a42;
+            --border: #e5e3df;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .auth-container {
+            max-width: 450px;
+            margin: 4rem auto;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 1px 3px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close-btn:hover {
+            background: var(--bg-primary);
+        }
+
+        .result-container {
+            margin-top: 2rem;
+        }
+
+        .markdown-content {
+            line-height: 1.8;
+        }
+
+        .markdown-content h2 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        .markdown-content h3 {
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+        }
+
+        .quiz-question {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .quiz-option {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+
+        .quiz-option.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .flashcard {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .flashcard:hover {
+            transform: scale(1.02);
+        }
+
+        .flashcard.flipped {
+            background: var(--bg-primary);
+        }
+
+        .flashcard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        #flashcardsNumero, #quizNumero {
+            padding: 0.4rem;
+            padding-left: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #efe;
+            color: #3a3;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">TutorIA</div>
+        <div class="user-menu">
+            <div id="userInfo" class="hidden">
+                <span id="userName"></span>
+            </div>
+            <button id="logoutBtn" class="btn btn-secondary hidden">Sair</button>
+            <button id="loginBtn" class="btn btn-secondary">Entrar</button>
+        </div>
+    </header>
+
+    <!-- Auth -->
+    <div id="authScreen" class="auth-container">
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">Bem-vindo ao TutorIA</h2>
+            
+            <div id="authError" class="error hidden"></div>
+            
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="login()">Entrar</button>
+                <p style="text-align: center; color: var(--text-secondary);">
+                    Não tem conta? <a href="#" onclick="showRegister(); return false;" style="color: var(--accent);">Cadastre-se</a>
+                </p>
+            </div>
+
+            <div id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <input type="text" id="registerName" placeholder="Seu nome">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="register()">Cadastrar</button>
+                <p style="text-align: center; color: var(--text-secondary);">
+                    Já tem conta? <a href="#" onclick="showLogin(); return false;" style="color: var(--accent);">Entre aqui</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div id="mainApp" class="container hidden">
+        <h1 style="margin-bottom: 2rem;">O que você gostaria de fazer?</h1>
+        
+        <div class="feature-grid">
+            <div class="feature-card" onclick="openModal('resumoModal')">
+                <div class="feature-icon">📝</div>
+                <div class="feature-title">Resumir Conteúdo</div>
+                <div class="feature-desc">Crie resumos estruturados de textos ou PDFs</div>
+            </div>
+
+            <div class="feature-card" onclick="openModal('quizModal')">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Criar Quiz</div>
+                <div class="feature-desc">Gere questões de múltipla escolha para testar conhecimento</div>
+            </div>
+
+            <div class="feature-card" onclick="openModal('flashcardsModal')">
+                <div class="feature-icon">🎴</div>
+                <div class="feature-title">Flashcards</div>
+                <div class="feature-desc">Crie cartões de estudo para memorização</div>
+            </div>
+
+            <div class="feature-card" onclick="openModal('perguntaModal')">
+                <div class="feature-icon">💬</div>
+                <div class="feature-title">Tirar Dúvida</div>
+                <div class="feature-desc">Faça perguntas com ou sem contexto</div>
+            </div>
+
+            <div class="feature-card" onclick="openModal('perfilModal')">
+                <div class="feature-icon">👤</div>
+                <div class="feature-title">Meu Perfil</div>
+                <div class="feature-desc">Visualize e edite suas informações</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    <div id="resumoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Resumir Conteúdo</h2>
+                <button class="close-btn" onclick="closeModal('resumoModal')">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Escolha o método:</label>
+                <select id="resumoMethod" onchange="toggleResumoInput()">
+                    <option value="texto">Texto Direto</option>
+                    <option value="pdf">Upload de PDF</option>
+                </select>
+            </div>
+
+            <div id="resumoTextoInput">
+                <div class="form-group">
+                    <label>Cole seu texto:</label>
+                    <textarea id="resumoTexto" placeholder="Cole aqui o texto que deseja resumir..."></textarea>
+                </div>
+            </div>
+
+            <div id="resumoPdfInput" class="hidden">
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="resumoPdf" accept=".pdf" onchange="updateFileName(this, 'resumoPdfName')">
+                        <label for="resumoPdf" class="file-input-label">
+                            📎 Selecionar PDF
+                        </label>
+                    </div>
+                    <div id="resumoPdfName" class="file-name"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="gerarResumo()">Gerar Resumo</button>
+
+            <div id="resumoLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Gerando resumo...</p>
+            </div>
+
+            <div id="resumoResult" class="result-container hidden"></div>
+        </div>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Criar Quiz</h2>
+                <button class="close-btn" onclick="closeModal('quizModal')">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Título do Quiz:</label>
+                <input type="text" id="quizTitulo" placeholder="Ex: Quiz de Matemática" value="Quiz">
+            </div>
+
+            <div class="form-group">
+                <label>Número de Questões (1-20):</label>
+                <input type="number" id="quizNumero" min="1" max="20" value="5">
+            </div>
+
+            <div class="form-group">
+                <label>Escolha o método:</label>
+                <select id="quizMethod" onchange="toggleQuizInput()">
+                    <option value="texto">Texto Direto</option>
+                    <option value="pdf">Upload de PDF</option>
+                </select>
+            </div>
+
+            <div id="quizTextoInput">
+                <div class="form-group">
+                    <label>Conteúdo base:</label>
+                    <textarea id="quizConteudo" placeholder="Cole aqui o conteúdo para criar o quiz..."></textarea>
+                </div>
+            </div>
+
+            <div id="quizPdfInput" class="hidden">
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="quizPdf" accept=".pdf" onchange="updateFileName(this, 'quizPdfName')">
+                        <label for="quizPdf" class="file-input-label">
+                            📎 Selecionar PDF
+                        </label>
+                    </div>
+                    <div id="quizPdfName" class="file-name"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="gerarQuiz()">Criar Quiz</button>
+
+            <div id="quizLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Criando quiz...</p>
+            </div>
+
+            <div id="quizResult" class="result-container hidden"></div>
+        </div>
+    </div>
+
+    <!-- Flashcards -->
+    <div id="flashcardsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Criar Flashcards</h2>
+                <button class="close-btn" onclick="closeModal('flashcardsModal')">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Número de Flashcards (1-50):</label>
+                <input type="number" id="flashcardsNumero" min="1" max="50" value="10">
+            </div>
+
+            <div class="form-group">
+                <label>Escolha o método:</label>
+                <select id="flashcardsMethod" onchange="toggleFlashcardsInput()">
+                    <option value="texto">Texto Direto</option>
+                    <option value="pdf">Upload de PDF</option>
+                </select>
+            </div>
+
+            <div id="flashcardsTextoInput">
+                <div class="form-group">
+                    <label>Conteúdo base:</label>
+                    <textarea id="flashcardsConteudo" placeholder="Cole aqui o conteúdo para criar flashcards..."></textarea>
+                </div>
+            </div>
+
+            <div id="flashcardsPdfInput" class="hidden">
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="flashcardsPdf" accept=".pdf" onchange="updateFileName(this, 'flashcardsPdfName')">
+                        <label for="flashcardsPdf" class="file-input-label">
+                            📎 Selecionar PDF
+                        </label>
+                    </div>
+                    <div id="flashcardsPdfName" class="file-name"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="gerarFlashcards()">Criar Flashcards</button>
+
+            <div id="flashcardsLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Criando flashcards...</p>
+            </div>
+
+            <div id="flashcardsResult" class="result-container hidden"></div>
+        </div>
+    </div>
+
+    <!-- Pergunta -->
+    <div id="perguntaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Tirar Dúvida</h2>
+                <button class="close-btn" onclick="closeModal('perguntaModal')">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Sua pergunta:</label>
+                <textarea id="perguntaTexto" placeholder="Digite sua dúvida aqui..." style="min-height: 100px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Com Contexto?</label>
+                <select id="perguntaMethod" onchange="togglePerguntaInput()">
+                    <option value="simples">Sem Contexto</option>
+                    <option value="texto">Com Texto de Contexto</option>
+                    <option value="pdf">Com PDF de Contexto</option>
+                </select>
+            </div>
+
+            <div id="perguntaContextoTextoInput" class="hidden">
+                <div class="form-group">
+                    <label>Contexto:</label>
+                    <textarea id="perguntaContexto" placeholder="Cole aqui o contexto..."></textarea>
+                </div>
+            </div>
+
+            <div id="perguntaPdfInput" class="hidden">
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="perguntaPdf" accept=".pdf" onchange="updateFileName(this, 'perguntaPdfName')">
+                        <label for="perguntaPdf" class="file-input-label">
+                            📎 Selecionar PDF
+                        </label>
+                    </div>
+                    <div id="perguntaPdfName" class="file-name"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="fazerPergunta()">Enviar Pergunta</button>
+
+            <div id="perguntaLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Processando sua dúvida...</p>
+            </div>
+
+            <div id="perguntaResult" class="result-container hidden"></div>
+        </div>
+    </div>
+
+    <!-- Perfil -->
+    <div id="perfilModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Meu Perfil</h2>
+                <button class="close-btn" onclick="closeModal('perfilModal')">×</button>
+            </div>
+
+            <div id="perfilLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Carregando perfil...</p>
+            </div>
+
+            <div id="perfilContent" class="hidden">
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Informações Pessoais</h3>
+                    <div style="padding: 1rem; background: var(--bg-primary); border-radius: var(--radius); margin-bottom: 0.5rem;">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Nome</p>
+                        <p id="perfilNome" style="font-weight: 500; font-size: 1.1rem;"></p>
+                    </div>
+                    <div style="padding: 1rem; background: var(--bg-primary); border-radius: var(--radius);">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Email</p>
+                        <p id="perfilEmail" style="font-weight: 500; font-size: 1.1rem;"></p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Alterar Nome</h3>
+                    <div class="form-group">
+                        <label>Novo Nome</label>
+                        <input type="text" id="novoNome" placeholder="Digite seu novo nome">
+                    </div>
+                    <button class="btn btn-primary" onclick="atualizarNome()">Salvar Nome</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Alterar Senha</h3>
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" id="novaSenha" placeholder="Digite sua nova senha">
+                    </div>
+                    <button class="btn btn-primary" onclick="atualizarSenha()">Salvar Senha</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4567';
+        let token = localStorage.getItem('token');
+        let currentFlashcards = [];
+        let currentFlashcardIndex = 0;
+        let isFlipped = false;
+
+        if (token) {
+            showMainApp();
+            loadUserProfile();
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('authError').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('authError').classList.add('hidden');
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    showMainApp();
+                } else {
+                    showError('authError', data.error || 'Erro ao fazer login');
+                }
+            } catch (error) {
+                showError('authError', 'Erro de conexão com o servidor');
+            }
+        }
+
+        async function register() {
+            const nome = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const senha = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showLogin();
+                    alert('Cadastro realizado com sucesso! Faça login.');
+                } else {
+                    showError('authError', data.error || 'Erro ao cadastrar');
+                }
+            } catch (error) {
+                showError('authError', 'Erro de conexão com o servidor');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            showAuthScreen();
+        }
+
+        function showMainApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('loginBtn').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+        }
+
+        function showAuthScreen() {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+        }
+
+        document.getElementById('loginBtn').onclick = showAuthScreen;
+        document.getElementById('logoutBtn').onclick = logout;
+
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_URL}/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('userName').textContent = data.nome;
+                } else {
+                    console.error('Erro ao carregar perfil');
+                }
+            } catch (error) {
+                console.error('Erro de conexão ao carregar perfil');
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            
+            if (modalId === 'perfilModal') {
+                carregarDadosPerfil();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function toggleResumoInput() {
+            const method = document.getElementById('resumoMethod').value;
+            document.getElementById('resumoTextoInput').classList.toggle('hidden', method !== 'texto');
+            document.getElementById('resumoPdfInput').classList.toggle('hidden', method !== 'pdf');
+        }
+
+        function toggleQuizInput() {
+            const method = document.getElementById('quizMethod').value;
+            document.getElementById('quizTextoInput').classList.toggle('hidden', method !== 'texto');
+            document.getElementById('quizPdfInput').classList.toggle('hidden', method !== 'pdf');
+        }
+
+        function toggleFlashcardsInput() {
+            const method = document.getElementById('flashcardsMethod').value;
+            document.getElementById('flashcardsTextoInput').classList.toggle('hidden', method !== 'texto');
+            document.getElementById('flashcardsPdfInput').classList.toggle('hidden', method !== 'pdf');
+        }
+
+        function togglePerguntaInput() {
+            const method = document.getElementById('perguntaMethod').value;
+            document.getElementById('perguntaContextoTextoInput').classList.toggle('hidden', method !== 'texto');
+            document.getElementById('perguntaPdfInput').classList.toggle('hidden', method !== 'pdf');
+        }
+
+        function updateFileName(input, displayId) {
+            const display = document.getElementById(displayId);
+            if (input.files.length > 0) {
+                display.textContent = `Arquivo: ${input.files[0].name}`;
+            } else {
+                display.textContent = '';
+            }
+        }
+
+        async function carregarDadosPerfil() {
+            const loading = document.getElementById('perfilLoading');
+            const content = document.getElementById('perfilContent');
+
+            loading.classList.add('active');
+            content.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_URL}/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                loading.classList.remove('active');
+
+                if (response.ok) {
+                    document.getElementById('perfilNome').textContent = data.nome;
+                    document.getElementById('perfilEmail').textContent = data.email;
+                    document.getElementById('novoNome').value = '';
+                    document.getElementById('novaSenha').value = '';
+                    content.classList.remove('hidden');
+                } else {
+                    alert(data.error || 'Erro ao carregar perfil');
+                    closeModal('perfilModal');
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                alert('Erro de conexão');
+                closeModal('perfilModal');
+            }
+        }
+
+        async function atualizarNome() {
+            const novoNome = document.getElementById('novoNome').value.trim();
+
+            if (!novoNome) {
+                alert('Por favor, digite um nome');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/me/nome`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nome: novoNome })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Nome atualizado com sucesso!');
+                    document.getElementById('perfilNome').textContent = data.nome;
+                    document.getElementById('userName').textContent = data.nome;
+                    document.getElementById('novoNome').value = '';
+                } else {
+                    alert(data.error || 'Erro ao atualizar nome');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function atualizarSenha() {
+            const novaSenha = document.getElementById('novaSenha').value;
+
+            if (!novaSenha) {
+                alert('Por favor, digite uma senha');
+                return;
+            }
+
+            if (novaSenha.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/me/senha`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ senha: novaSenha })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Senha atualizada com sucesso!');
+                    document.getElementById('novaSenha').value = '';
+                } else {
+                    alert(data.error || 'Erro ao atualizar senha');
+                }
+            } catch (error) {
+                alert('Erro de conexão');
+            }
+        }
+
+        async function gerarResumo() {
+            const method = document.getElementById('resumoMethod').value;
+            const loading = document.getElementById('resumoLoading');
+            const result = document.getElementById('resumoResult');
+
+            loading.classList.add('active');
+            result.classList.add('hidden');
+
+            try {
+                let response;
+                if (method === 'texto') {
+                    const texto = document.getElementById('resumoTexto').value;
+                    response = await fetch(`${API_URL}/api/ai/resumir/texto`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ texto })
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('pdf', document.getElementById('resumoPdf').files[0]);
+                    response = await fetch(`${API_URL}/api/ai/resumir/pdf`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+                loading.classList.remove('active');
+
+                if (response.ok) {
+                    result.innerHTML = `<div class="card markdown-content">${formatMarkdown(data.resumo)}</div>`;
+                    result.classList.remove('hidden');
+                } else {
+                    alert(data.erro || 'Erro ao gerar resumo');
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                alert('Erro de conexão');
+            }
+        }
+
+        async function gerarQuiz() {
+            const method = document.getElementById('quizMethod').value;
+            const titulo = document.getElementById('quizTitulo').value;
+            const numeroQuestoes = document.getElementById('quizNumero').value;
+            const loading = document.getElementById('quizLoading');
+            const result = document.getElementById('quizResult');
+
+            loading.classList.add('active');
+            result.classList.add('hidden');
+
+            try {
+                let response;
+                if (method === 'texto') {
+                    const conteudo = document.getElementById('quizConteudo').value;
+                    response = await fetch(`${API_URL}/api/ai/quiz/texto`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ conteudo, titulo, numeroQuestoes: parseInt(numeroQuestoes) })
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('pdf', document.getElementById('quizPdf').files[0]);
+                    formData.append('titulo', titulo);
+                    formData.append('numeroQuestoes', numeroQuestoes);
+                    response = await fetch(`${API_URL}/api/ai/quiz/pdf`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+                loading.classList.remove('active');
+
+                if (response.ok) {
+                    displayQuiz(data);
+                    result.classList.remove('hidden');
+                } else {
+                    alert(data.erro || 'Erro ao criar quiz');
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                console.error('Erro completo:', error);
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+
+        async function gerarFlashcards() {
+            const method = document.getElementById('flashcardsMethod').value;
+            const numeroCards = document.getElementById('flashcardsNumero').value;
+            const loading = document.getElementById('flashcardsLoading');
+            const result = document.getElementById('flashcardsResult');
+
+            loading.classList.add('active');
+            result.classList.add('hidden');
+
+            try {
+                let response;
+                if (method === 'texto') {
+                    const conteudo = document.getElementById('flashcardsConteudo').value;
+                    response = await fetch(`${API_URL}/api/ai/flashcards/texto`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ conteudo, numeroCards: parseInt(numeroCards) })
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('pdf', document.getElementById('flashcardsPdf').files[0]);
+                    formData.append('numeroCards', numeroCards);
+                    response = await fetch(`${API_URL}/api/ai/flashcards/pdf`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+                loading.classList.remove('active');
+
+                if (response.ok) {
+                    currentFlashcards = data.flashcards;
+                    currentFlashcardIndex = 0;
+                    isFlipped = false;
+                    displayFlashcard();
+                    result.classList.remove('hidden');
+                } else {
+                    alert(data.erro || 'Erro ao criar flashcards');
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                console.error('Erro completo:', error);
+                alert('Erro de conexão: ' + error.message);
+            }
+        }
+
+        async function fazerPergunta() {
+            const method = document.getElementById('perguntaMethod').value;
+            const pergunta = document.getElementById('perguntaTexto').value;
+            const loading = document.getElementById('perguntaLoading');
+            const result = document.getElementById('perguntaResult');
+
+            loading.classList.add('active');
+            result.classList.add('hidden');
+
+            try {
+                let response;
+                if (method === 'simples') {
+                    response = await fetch(`${API_URL}/api/ai/perguntar`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ pergunta })
+                    });
+                } else if (method === 'texto') {
+                    const contexto = document.getElementById('perguntaContexto').value;
+                    response = await fetch(`${API_URL}/api/ai/perguntar/contexto`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ pergunta, contexto })
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('pergunta', pergunta);
+                    formData.append('pdf', document.getElementById('perguntaPdf').files[0]);
+                    response = await fetch(`${API_URL}/api/ai/perguntar/pdf`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+                }
+
+                const data = await response.json();
+                loading.classList.remove('active');
+
+                if (response.ok) {
+                    result.innerHTML = `<div class="card markdown-content">${formatMarkdown(data.resposta)}</div>`;
+                    result.classList.remove('hidden');
+                } else {
+                    alert(data.erro || 'Erro ao responder');
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                alert('Erro de conexão');
+            }
+        }
+
+        function displayQuiz(quiz) {
+            const result = document.getElementById('quizResult');
+            
+            let html = `<div class="card"><h2 style="margin-bottom: 1rem;">${quiz.titulo || 'Quiz'}</h2>`;
+            
+            const questoes = quiz.questoes || [];
+            questoes.forEach((q, i) => {
+                html += `
+                    <div class="quiz-question">
+                        <h3>Questão ${i + 1}</h3>
+                        <p style="margin: 1rem 0;">${q.textoPergunta}</p>
+                        <div class="quiz-options">
+                            ${(q.opcoesResposta || []).map(op => `
+                                <div class="quiz-option">${op}</div>
+                            `).join('')}
+                        </div>
+                        <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-secondary);">
+                            <strong>Resposta:</strong> ${q.respostaCorreta}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        function displayFlashcard() {
+            const result = document.getElementById('flashcardsResult');
+            const card = currentFlashcards[currentFlashcardIndex];
+            
+            const html = `
+                <div class="card">
+                    <div class="flashcard ${isFlipped ? 'flipped' : ''}" onclick="flipCard()">
+                        <div style="font-size: 1.2rem;">
+                            ${isFlipped ? card.versoResposta : card.frentePergunta}
+                        </div>
+                    </div>
+                    <div class="flashcard-nav">
+                        <button class="btn btn-secondary" onclick="prevCard()" ${currentFlashcardIndex === 0 ? 'disabled' : ''}>
+                            ← Anterior
+                        </button>
+                        <span>${currentFlashcardIndex + 1} / ${currentFlashcards.length}</span>
+                        <button class="btn btn-secondary" onclick="nextCard()" ${currentFlashcardIndex === currentFlashcards.length - 1 ? 'disabled' : ''}>
+                            Próximo →
+                        </button>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                        Clique no card para virar
+                    </p>
+                </div>
+            `;
+            
+            result.innerHTML = html;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            displayFlashcard();
+        }
+
+        function nextCard() {
+            if (currentFlashcardIndex < currentFlashcards.length - 1) {
+                currentFlashcardIndex++;
+                isFlipped = false;
+                displayFlashcard();
+            }
+        }
+
+        function prevCard() {
+            if (currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
+                isFlipped = false;
+                displayFlashcard();
+            }
+        }
+
+        function formatMarkdown(text) {
+            return text
+                .replace(/#{3}\s+(.+)/g, '<h3>$1</h3>')
+                .replace(/#{2}\s+(.+)/g, '<h2>$1</h2>')
+                .replace(/#{1}\s+(.+)/g, '<h1>$1</h1>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/^\- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(?!<[h|u|l])/gm, '<p>')
+                .replace(/(?<![>])$/gm, '</p>');
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.remove('hidden');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
