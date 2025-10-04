@@ -766,7 +766,9 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:4567';
+        const API_URL = window.location.hostname === "localhost" ? "http://localhost:4567" : "https://tutoria-qhph.onrender.com";
+
+
         let token = localStorage.getItem('token');
         let currentFlashcards = [];
         let currentFlashcardIndex = 0;
