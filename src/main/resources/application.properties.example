@@ -1,0 +1,14 @@
+# URL de Conexão
+db.url=jdbc:postgresql://localhost:5432/seu_banco
+
+# Usuário de Acesso
+db.user=seu_username_postgres
+
+# Senha do Usuário
+db.password=sua_senha_postgres
+
+# JWT
+jwt.secret=seu_codigo_jwt_secreto_seguro
+
+# IA
+ai.api.key=sua_chave_gemini
