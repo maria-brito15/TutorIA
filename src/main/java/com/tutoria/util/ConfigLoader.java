@@ -29,15 +29,12 @@ public class ConfigLoader {
     public static String getProperty(String chave) {
         carregarProperties();
 
-        // 1. Tenta pegar do ambiente primeiro
         String envKey = chave.toUpperCase().replace('.', '_');
         String valor = System.getenv(envKey);
 
-        // 2. Se não existir, pega do properties
         if (valor == null) {
             valor = properties.getProperty(chave);
 
-            // 3. Substitui ${VAR} pelo valor da variável de ambiente
             if (valor != null) {
                 valor = substituirVariavelAmbiente(valor);
             }
@@ -51,7 +48,6 @@ public class ConfigLoader {
     }
 
     private static String substituirVariavelAmbiente(String valor) {
-        // Procura por padrões do tipo ${VAR}
         while (valor.contains("${") && valor.contains("}")) {
             int inicio = valor.indexOf("${");
             int fim = valor.indexOf("}", inicio);
@@ -59,7 +55,7 @@ public class ConfigLoader {
                 String varName = valor.substring(inicio + 2, fim);
                 String envValue = System.getenv(varName);
                 if (envValue == null) {
-                    envValue = ""; // ou lançar exceção, se preferir
+                    envValue = "";
                 }
                 valor = valor.substring(0, inicio) + envValue + valor.substring(fim + 1);
             } else {
