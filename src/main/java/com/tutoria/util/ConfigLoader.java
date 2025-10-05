@@ -51,12 +51,15 @@ public class ConfigLoader {
         while (valor.contains("${") && valor.contains("}")) {
             int inicio = valor.indexOf("${");
             int fim = valor.indexOf("}", inicio);
+            
             if (fim > inicio) {
                 String varName = valor.substring(inicio + 2, fim);
                 String envValue = System.getenv(varName);
+                
                 if (envValue == null) {
                     envValue = "";
                 }
+                
                 valor = valor.substring(0, inicio) + envValue + valor.substring(fim + 1);
             } else {
                 break;
